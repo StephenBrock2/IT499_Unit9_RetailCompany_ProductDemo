@@ -6,12 +6,7 @@ from dependencies import state_change, get_order_repo
 from order_repo import OrderRepository
 from db_initialization import db_init
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    if app.state.env == "prod":
-        db_init()
-
-    yield
+db_init()
 
 app = FastAPI()
 
