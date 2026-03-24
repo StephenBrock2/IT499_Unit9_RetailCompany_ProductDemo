@@ -14,10 +14,10 @@ file_handler.setFormatter(formatter)
 log.addHandler(file_handler)
 
 def db_connect():
-    DATABASE = os.getenv("DATABASE")
+    DATABASE_URL = os.getenv("DATABASE_URL")
     USERNAME = os.getenv("USERNAME")
     PWD = os.getenv("PWD")
-    conn = psycopg2.connect(f'dbname={DATABASE} user={USERNAME} password={PWD}')
+    conn = psycopg2.connect(f'dbname={DATABASE_URL} user={USERNAME} password={PWD}')
     cur = conn.cursor()
     return cur, conn
 
