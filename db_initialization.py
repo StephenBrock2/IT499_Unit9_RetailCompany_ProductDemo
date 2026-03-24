@@ -22,11 +22,8 @@ def db_disconnect(cur, conn):
     cur.close() 
     conn.close()
 
-ef db_init():
-    cur, conn = db_connect()
-    try:
-        with conn, cur:
-            cur.execute("""CREATE EXTENSION IF NOT EXISTS pgcrypto;
+def db_init():
+    schema_sql = """CREATE EXTENSION IF NOT EXISTS pgcrypto;
                         CREATE TABLE customers (
                             customerID int GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
                             first_name varchar(30) NOT NULL,
@@ -68,9 +65,9 @@ ef db_init():
                             orderID int REFERENCES orders(orderID),
                             productID int REFERENCES products(productID),
                             quantity int NOT NULL
-                        );
-                                                    
-                        INSERT INTO products (product_name, upc_number, price)
+                        );"""
+    
+    table_seed_sql = """INSERT INTO products (product_name, upc_number, price)
                         VALUES ('WIRELESS MOUSE', '012345678905', 19.99),
                         ('MECHANICAL KEYBOARD', '098765432112', 89.50),
                         ('USB-C CHARGING CABLE', '123450987654', 12.99),
@@ -115,15 +112,15 @@ ef db_init():
                         (pgp_sym_encrypt('6011601160116611', '3f92b1e7c4a8d0f6e1b3c9d2a7f4e0c1'), 8),
                         (pgp_sym_encrypt('6011000990139424', '3f92b1e7c4a8d0f6e1b3c9d2a7f4e0c1'), 9),
                         (pgp_sym_encrypt('3566002020360505', '3f92b1e7c4a8d0f6e1b3c9d2a7f4e0c1'), 10);
-
-                        REVOKE ALL ON SCHEMA public FROM PUBLIC;
+                        """
+    role_management_sql = """REVOKE ALL ON SCHEMA public FROM PUBLIC;
                         REVOKE ALL ON ALL TABLES IN SCHEMA public FROM PUBLIC;
 
                         CREATE ROLE "ordermanager" LOGIN PASSWORD 'ordermng';
                         GRANT USAGE ON SCHEMA public TO "ordermanager";
-                        GRANT SELECT, INSERT, UPDATE ON customers, order_itemization, orders, payment_methods, products TO "ordermanager";      
-
-                        CREATE OR REPLACE FUNCTION CreateNewOrder(customer_id int, orderdate date, ordertime time, ordershipping decimal, taxrate decimal)
+                        GRANT SELECT, INSERT, UPDATE ON customers, order_itemization, orders, payment_methods, products TO "ordermanager";
+                        """
+    create_function_sql = """CREATE OR REPLACE FUNCTION CreateNewOrder(customer_id int, orderdate date, ordertime time, ordershipping decimal, taxrate decimal)
                         RETURNS TABLE(orderid int, order_number bigint, order_date date, order_time time, order_shipping decimal, tax_value decimal, order_total decimal, order_status varchar)
                         LANGUAGE plpgsql
                         AS $$
@@ -233,8 +230,16 @@ ef db_init():
                             FROM products p JOIN order_itemization o ON p.productid = o.productid
                             WHERE o.orderid = order_id;
                         END;
-                        $$;                                                     
-                        """)
+                        $$;
+                        """
+
+    cur, conn = db_connect()
+    try:
+            cur.execute(schema_sql)
+            cur.execute(table_seed_sql)
+            cur.execute(role_management_sql)
+            cur.execute(create_function_sql)
+            conn.commit()
 
     except Exception as e:
         log.error(e)
