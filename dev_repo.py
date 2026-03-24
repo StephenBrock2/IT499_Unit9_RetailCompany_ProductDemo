@@ -1,4 +1,4 @@
-from order_repo import OrderRepository
+from order_repo import Order, OrderRepository
 import random
 import datetime
 from datetime import date
@@ -10,21 +10,6 @@ file_handler = logging.FileHandler("activity.log")
 formatter = logging.Formatter("%(asctime)s [%(levelname)s] %(message)s","%Y-%m-%d %H:%M:%S")
 file_handler.setFormatter(formatter)
 log.addHandler(file_handler)
-
-class Order():
-    def __init__(self, order_id, order_shipping, order_tax, user_id):
-        self.id = order_id
-        self.number = str(random.randrange(1000000000, 9999999999))
-        self.date = str(date.today())
-        self.time = str(datetime.datetime.now().time().strftime("%H:%M:%S"))
-        self.shipping = order_shipping
-        self.tax = order_tax
-        self.pre_total = 0.0
-        self.tax_value = 0.0
-        self.total = 0.0
-        self.user = user_id
-        self.status = 'Not Shipped'
-        self.items = {}
 
 class DevOrderRepository(OrderRepository):
     def __init__(self):
