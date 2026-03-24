@@ -11,7 +11,7 @@ def home():
     return RedirectResponse(url="/docs")
 
 # define test state versus live state
-state_change(app, "dev") # "dev" or "prod"
+state_change(app, "prod") # "dev" or "prod"
 
 class OrderCreate(BaseModel):
     shipping: float
