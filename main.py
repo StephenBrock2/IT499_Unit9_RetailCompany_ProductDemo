@@ -4,9 +4,6 @@ from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
 from dependencies import state_change, get_order_repo
 from order_repo import OrderRepository
-from db_initialization import db_init
-
-db_init()
 
 app = FastAPI()
 
