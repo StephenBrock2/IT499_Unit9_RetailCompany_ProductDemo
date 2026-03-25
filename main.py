@@ -4,14 +4,18 @@ from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
 from dependencies import state_change, get_order_repo
 from order_repo import OrderRepository
+#from db_initialization import db_init
+# Initializes demo database configuration and schema on application start. Only run on first startup
+#db_init()
 
 app = FastAPI()
 
+# Redirects the demo homepage to /docs 
 @app.get("/", include_in_schema=False)
 def home():
     return RedirectResponse(url="/docs")
 
-# define test state versus live state
+# define test state versus live state / switches between in-memory reposiotry and database repository
 state_change(app, "prod") # "dev" or "prod"
 
 class OrderCreate(BaseModel):
