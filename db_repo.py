@@ -69,8 +69,8 @@ class DBOrderRepository(OrderRepository):
         cur, conn = db_connect()
         try:
             with conn, cur:
-                cur.execute("SELECT * FROM GetOrderStatus(%s);",
-                (order_id,))
+                cur.execute("SELECT * FROM GetOrderStatus(%s, %s);",
+                (user_id, order_id))
                 query = cur.fetchall()
                 query = query[0]
                 order = Order(order_id=order_id, order_shipping=0.0, order_tax=0.0, user_id=user_id)
@@ -92,8 +92,8 @@ class DBOrderRepository(OrderRepository):
         cur, conn = db_connect()
         try:
             with conn, cur:
-                cur.execute("SELECT * FROM CancelCustomerOrder(%s);",
-                (order_id,))
+                cur.execute("SELECT * FROM CancelCustomerOrder(%s, %s);",
+                (user_id, order_id))
                 query = cur.fetchall()
                 query = query[0]
                 order = Order(order_id=order_id, order_shipping=0.0, order_tax=0.0, user_id=user_id)
@@ -115,8 +115,8 @@ class DBOrderRepository(OrderRepository):
         cur, conn = db_connect()
         try:
             with conn, cur:
-                cur.execute("SELECT * FROM GetOrderStatus(%s);",
-                (order_id,))
+                cur.execute("SELECT * FROM GetOrderStatus(%s, %s);",
+                (user_id, order_id))
                 query = cur.fetchall()
                 query = query[0]
                 order = Order(order_id=order_id, order_shipping=0.0, order_tax=0.0, user_id=user_id)
