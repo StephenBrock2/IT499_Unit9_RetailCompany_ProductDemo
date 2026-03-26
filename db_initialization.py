@@ -123,9 +123,6 @@ def db_init():
     create_function_sql = """DROP FUNCTION GetOrderStatus(int);
                             DROP FUNCTION CancelCustomerOrder(int);
                             DROP FUNCTION GetOrderItemization(int);
-                            DROP FUNCTION GetOrderStatus(int, int);
-                            DROP FUNCTION CancelCustomerOrder(int, int);
-                            DROP FUNCTION GetOrderItemization(int, int);
     
                         CREATE OR REPLACE FUNCTION CreateNewOrder(customer_id int, orderdate date, ordertime time, ordershipping decimal, taxrate decimal)
                         RETURNS TABLE(orderid int, order_number bigint, order_date date, order_time time, order_shipping decimal, tax_value decimal, order_total decimal, order_status varchar)
