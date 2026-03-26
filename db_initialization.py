@@ -240,15 +240,11 @@ def db_init():
 
     cur, conn = db_connect()
     try:
-            #cur.execute(schema_sql)
-            #cur.execute(table_seed_sql)
-            #cur.execute(role_management_sql)
-            cur.execute("""DROP FUNCTION GetOrderStatus(int);
-                            DROP FUNCTION CancelCustomerOrder(int);
-                            DROP FUNCTION GetOrderItemization(int);
-                        """)
-            cur.execute(create_function_sql)
-            conn.commit()
+        cur.execute(schema_sql)
+        cur.execute(table_seed_sql)
+        cur.execute(role_management_sql)
+        cur.execute(create_function_sql)
+        conn.commit()
 
     except Exception as e:
         log.error(e)
