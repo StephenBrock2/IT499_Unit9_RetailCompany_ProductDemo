@@ -120,7 +120,11 @@ def db_init():
                         GRANT USAGE ON SCHEMA public TO "ordermanager";
                         GRANT SELECT, INSERT, UPDATE ON customers, order_itemization, orders, payment_methods, products TO "ordermanager";
                         """
-    create_function_sql = """CREATE OR REPLACE FUNCTION CreateNewOrder(customer_id int, orderdate date, ordertime time, ordershipping decimal, taxrate decimal)
+    create_function_sql = """DROP FUNCTION GetOrderStatus(int);
+                            DROP FUNCTION CancelCustomerOrder(int);
+                            DROP FUNCTION GetOrderItemization(int);
+    
+                        CREATE OR REPLACE FUNCTION CreateNewOrder(customer_id int, orderdate date, ordertime time, ordershipping decimal, taxrate decimal)
                         RETURNS TABLE(orderid int, order_number bigint, order_date date, order_time time, order_shipping decimal, tax_value decimal, order_total decimal, order_status varchar)
                         LANGUAGE plpgsql
                         AS $$
@@ -192,7 +196,7 @@ def db_init():
                         END;
                         $$;
 
-                        CREATE OR REPLACE FUNCTION GetOrderStatus(order_id int)
+                        CREATE OR REPLACE FUNCTION GetOrderStatus(user_id int, order_id int)
                         RETURNS TABLE(orderid int, order_number bigint, order_date date, order_time time, order_shipping decimal, tax_value decimal, order_status varchar, order_total decimal)
                         LANGUAGE plpgsql
                         AS $$
@@ -200,11 +204,12 @@ def db_init():
                             RETURN QUERY
                             SELECT o.orderid, o.order_number, o.order_date, o.order_time, o. order_shipping, o.tax_value, o.order_status, o.order_total
                             FROM orders o
-                            WHERE o.orderid = order_id;
+                            WHERE o.orderid = order_id
+                            AND o.customerid = user_id;
                         END;
                         $$;
 
-                        CREATE OR REPLACE FUNCTION CancelCustomerOrder(order_id int)
+                        CREATE OR REPLACE FUNCTION CancelCustomerOrder(user_id int, order_id int)
                         RETURNS TABLE(orderid int, order_number bigint, order_date date, order_time time, order_status varchar, order_total decimal)
                         LANGUAGE plpgsql
                         AS $$
@@ -216,11 +221,12 @@ def db_init():
                             RETURN QUERY
                             SELECT o.orderid, o.order_number, o.order_date, o.order_time, o.order_status, o.order_total
                             FROM orders o
-                            WHERE o.orderid = order_id;
+                            WHERE o.orderid = order_id
+                            AND o.customerid = user_id;
                         END;
                         $$;
 
-                        CREATE OR REPLACE FUNCTION GetOrderItemization(order_id int)
+                        CREATE OR REPLACE FUNCTION GetOrderItemization(user_id int, order_id int)
                         RETURNS TABLE(productid int, product_name varchar, upc_number varchar, price decimal, quantity int, item_total decimal)
                         LANGUAGE plpgsql
                         AS $$
@@ -228,7 +234,8 @@ def db_init():
                             RETURN QUERY
                             SELECT p.productid, p.product_name, p.upc_number, p.price, o.quantity, (p.price * o.quantity) AS item_total 
                             FROM products p JOIN order_itemization o ON p.productid = o.productid
-                            WHERE o.orderid = order_id;
+                            WHERE o.orderid = order_id
+                            AND o.customerid = user_id;
                         END;
                         $$;
                         """
