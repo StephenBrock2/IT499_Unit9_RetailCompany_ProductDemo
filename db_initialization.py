@@ -120,11 +120,7 @@ def db_init():
                         GRANT USAGE ON SCHEMA public TO "ordermanager";
                         GRANT SELECT, INSERT, UPDATE ON customers, order_itemization, orders, payment_methods, products TO "ordermanager";
                         """
-    create_function_sql = """DROP FUNCTION GetOrderStatus(int);
-                            DROP FUNCTION CancelCustomerOrder(int);
-                            DROP FUNCTION GetOrderItemization(int);
-    
-                        CREATE OR REPLACE FUNCTION CreateNewOrder(customer_id int, orderdate date, ordertime time, ordershipping decimal, taxrate decimal)
+    create_function_sql = """CREATE OR REPLACE FUNCTION CreateNewOrder(customer_id int, orderdate date, ordertime time, ordershipping decimal, taxrate decimal)
                         RETURNS TABLE(orderid int, order_number bigint, order_date date, order_time time, order_shipping decimal, tax_value decimal, order_total decimal, order_status varchar)
                         LANGUAGE plpgsql
                         AS $$
@@ -244,9 +240,13 @@ def db_init():
 
     cur, conn = db_connect()
     try:
-            cur.execute(schema_sql)
-            cur.execute(table_seed_sql)
-            cur.execute(role_management_sql)
+            #cur.execute(schema_sql)
+            #cur.execute(table_seed_sql)
+            #cur.execute(role_management_sql)
+            cur.execute("""DROP FUNCTION GetOrderStatus(int);
+                            DROP FUNCTION CancelCustomerOrder(int);
+                            DROP FUNCTION GetOrderItemization(int);
+                        """)
             cur.execute(create_function_sql)
             conn.commit()
 
