@@ -204,42 +204,43 @@ def db_init():
                         LANGUAGE plpgsql
                         AS $$
                         BEGIN
-                            RETURN QUERY
-                            SELECT o.orderid, o.order_number, o.order_date, o.order_time, o. order_shipping, o.tax_value, o.order_status, o.order_total, o.customerid
-                            FROM orders o
-                            WHERE o.orderid = order_id
-                            AND o.customerid = user_id;
+                        	RETURN QUERY
+                        	SELECT o.orderid, o.order_number, o.order_date, o.order_time, o. order_shipping, o.tax_value, o.order_status, o.order_total, o.customerid
+                        	FROM orders o
+                        	WHERE o.orderid = order_id
+                        	AND o.customerid = user_id;
                         END;
                         $$;
-
+                        
                         CREATE OR REPLACE FUNCTION CancelCustomerOrder(user_id int, order_id int)
-                        RETURNS TABLE(orderid int, order_number bigint, order_date date, order_time time, order_status varchar, order_total decimal, customerid int)
+                        RETURNS TABLE(orderid int, order_number bigint, order_date date, order_time time, order_status varchar, order_total decimal)
                         LANGUAGE plpgsql
                         AS $$
                         BEGIN
-                            UPDATE orders o 
-                            SET order_status = 'Cancelled'
-                            WHERE o.orderid = order_id AND o.order_status NOT IN ('Fulfilled', 'Cancelled')
-                            AND o.customerid = user_id;
-                            
-                            RETURN QUERY
-                            SELECT o.orderid, o.order_number, o.order_date, o.order_time, o.order_status, o.order_total, o.customerid
-                            FROM orders o
-                            WHERE o.orderid = order_id
-                            AND o.customerid = user_id;
+                        	UPDATE orders o 
+                        	SET order_status = 'Cancelled'
+                        	WHERE o.orderid = order_id AND o.order_status NOT IN ('Fulfilled', 'Cancelled')
+                        	AND o.customerid = user_id;
+                        	
+                        	RETURN QUERY
+                        	SELECT o.orderid, o.order_number, o.order_date, o.order_time, o.order_status, o.order_total
+                        	FROM orders o
+                        	WHERE o.orderid = order_id
+                        	AND o.customerid = user_id;
                         END;
                         $$;
-
+                        
                         CREATE OR REPLACE FUNCTION GetOrderItemization(user_id int, order_id int)
-                        RETURNS TABLE(productid int, product_name varchar, upc_number varchar, price decimal, quantity int, item_total decimal)
+                        RETURNS TABLE(productid int, product_name varchar, upc_number varchar, price decimal, quantity int, item_total decimal, customerid int)
                         LANGUAGE plpgsql
                         AS $$
                         BEGIN
-                            RETURN QUERY
-                            SELECT p.productid, p.product_name, p.upc_number, p.price, o.quantity, (p.price * o.quantity) AS item_total 
-                            FROM products p JOIN order_itemization o ON p.productid = o.productid JOIN orders c ON o.orderid = c.orderid
-                            WHERE o.orderid = order_id
-                            AND c.customerid = user_id;
+                        	RETURN QUERY
+                        	SELECT p.productid, p.product_name, p.upc_number, p.price, o.quantity, (p.price * o.quantity) AS item_total, c.customerid
+                        	FROM products p JOIN order_itemization o ON p.productid = o.productid
+                        	JOIN orders c ON o.orderid = c.orderid
+                        	WHERE o.orderid = order_id
+                        	AND c.customerid = user_id;
                         END;
                         $$;
                         """
