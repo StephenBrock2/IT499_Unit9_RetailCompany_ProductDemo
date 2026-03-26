@@ -123,6 +123,9 @@ def db_init():
     create_function_sql = """DROP FUNCTION GetOrderStatus(int);
                             DROP FUNCTION CancelCustomerOrder(int);
                             DROP FUNCTION GetOrderItemization(int);
+                            DROP FUNCTION GetOrderStatus(int, int);
+                            DROP FUNCTION CancelCustomerOrder(int, int);
+                            DROP FUNCTION GetOrderItemization(int, int);
     
                         CREATE OR REPLACE FUNCTION CreateNewOrder(customer_id int, orderdate date, ordertime time, ordershipping decimal, taxrate decimal)
                         RETURNS TABLE(orderid int, order_number bigint, order_date date, order_time time, order_shipping decimal, tax_value decimal, order_total decimal, order_status varchar)
@@ -197,12 +200,12 @@ def db_init():
                         $$;
 
                         CREATE OR REPLACE FUNCTION GetOrderStatus(user_id int, order_id int)
-                        RETURNS TABLE(orderid int, order_number bigint, order_date date, order_time time, order_shipping decimal, tax_value decimal, order_status varchar, order_total decimal)
+                        RETURNS TABLE(orderid int, order_number bigint, order_date date, order_time time, order_shipping decimal, tax_value decimal, order_status varchar, order_total decimal, customerid int)
                         LANGUAGE plpgsql
                         AS $$
                         BEGIN
                             RETURN QUERY
-                            SELECT o.orderid, o.order_number, o.order_date, o.order_time, o. order_shipping, o.tax_value, o.order_status, o.order_total
+                            SELECT o.orderid, o.order_number, o.order_date, o.order_time, o. order_shipping, o.tax_value, o.order_status, o.order_total, o.customerid
                             FROM orders o
                             WHERE o.orderid = order_id
                             AND o.customerid = user_id;
@@ -210,16 +213,17 @@ def db_init():
                         $$;
 
                         CREATE OR REPLACE FUNCTION CancelCustomerOrder(user_id int, order_id int)
-                        RETURNS TABLE(orderid int, order_number bigint, order_date date, order_time time, order_status varchar, order_total decimal)
+                        RETURNS TABLE(orderid int, order_number bigint, order_date date, order_time time, order_status varchar, order_total decimal, customerid int)
                         LANGUAGE plpgsql
                         AS $$
                         BEGIN
                             UPDATE orders o 
                             SET order_status = 'Cancelled'
-                            WHERE o.orderid = order_id AND o.order_status NOT IN ('Fulfilled', 'Cancelled');
+                            WHERE o.orderid = order_id AND o.order_status NOT IN ('Fulfilled', 'Cancelled')
+                            AND o.customerid = user_id;
                             
                             RETURN QUERY
-                            SELECT o.orderid, o.order_number, o.order_date, o.order_time, o.order_status, o.order_total
+                            SELECT o.orderid, o.order_number, o.order_date, o.order_time, o.order_status, o.order_total, o.customerid
                             FROM orders o
                             WHERE o.orderid = order_id
                             AND o.customerid = user_id;
@@ -233,9 +237,9 @@ def db_init():
                         BEGIN
                             RETURN QUERY
                             SELECT p.productid, p.product_name, p.upc_number, p.price, o.quantity, (p.price * o.quantity) AS item_total 
-                            FROM products p JOIN order_itemization o ON p.productid = o.productid
+                            FROM products p JOIN order_itemization o ON p.productid = o.productid JOIN orders c ON o.orderid = c.orderid
                             WHERE o.orderid = order_id
-                            AND o.customerid = user_id;
+                            AND c.customerid = user_id;
                         END;
                         $$;
                         """
