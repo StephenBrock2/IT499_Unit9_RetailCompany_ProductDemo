@@ -128,8 +128,8 @@ class DBOrderRepository(OrderRepository):
                 order.status = query[6]
                 order.total = f"{query[7]:.2F}"
 
-                cur.execute("SELECT * FROM GetOrderItemization(%s);",
-                (order_id,))
+                cur.execute("SELECT * FROM GetOrderItemization(%s, %s);",
+                (user_id, order_id))
                 query = cur.fetchall()
                 order_itemized = {}
                 for item in query:
