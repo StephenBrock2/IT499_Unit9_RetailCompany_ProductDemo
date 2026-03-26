@@ -4,9 +4,9 @@ from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
 from dependencies import state_change, get_order_repo
 from order_repo import OrderRepository
-#from db_initialization import db_init
+from db_initialization import db_init
 # Initializes demo database configuration and schema on application start. Only run on first startup
-#db_init()
+db_init()
 
 app = FastAPI()
 
